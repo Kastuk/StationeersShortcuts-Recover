@@ -20,7 +20,7 @@ using UnityEngine;
 
 namespace StationeersShortcuts
 {
-    [BepInPlugin("net.ilo.plugins.ShortCutsPlugin", "ShortCuts Plug-In", "0.9.1.3")]
+    [BepInPlugin("net.ilo.plugins.ShortCutsPlugin", "ShortCuts Plug-In", "0.9.1.4")]
     public class ShortcutsPlugin : BaseUnityPlugin
     {
 
@@ -49,6 +49,8 @@ namespace StationeersShortcuts
         public static KeyCode ScrewSC;
         public static KeyCode CrowbarSC;
         public static KeyCode AuthoringSC;
+
+        public static KeyCode SensLens;
 
         // Awake is called once when both the game and the plug-in are loaded
         void Awake()
@@ -103,6 +105,8 @@ namespace StationeersShortcuts
             ScrewSC = KeyManager.GetKey("Screwdriver");
             CrowbarSC = KeyManager.GetKey("Crowbar");
             AuthoringSC = KeyManager.GetKey("Authoring tool");
+
+            SensLens = KeyManager.GetKey("Sensor Lenses On/Off");
         }
 
         // Tracking of user inputs to perform slot swapping.
@@ -114,20 +118,20 @@ namespace StationeersShortcuts
         [HarmonyPatch(typeof(GameManager), nameof(GameManager.Update))]//, new Type[] { typeof(bool) })]
         class CheckKeysPressed
         {
-        static bool warn = true;
-        static bool warn2 = true;
+       // static bool warn = true;
+       // static bool warn2 = true;
 
         static void Postfix()
         { 
 
             // Usual suspects, don't check for key pressing in any of these cases
-            if (warn) Debug.Log("Update of keys tracker is works"); warn = false;
+           // if (warn) Debug.Log("Update of keys tracker is works"); warn = false;
 
 
             if (GameManager.GameState != GameState.Running || (UnityEngine.Object)InventoryManager.ParentBrain == (UnityEngine.Object)null || WorldManager.IsGamePaused)
                 return;
 
-            if (warn2) Debug.Log("Update of keys tracker isovercome initial checks"); warn2 = false;
+            //if (warn2) Debug.Log("Update of keys tracker isovercome initial checks"); warn2 = false;
 
             // this will be the slot from any of the inventory items.
             Slot inventory = null;
@@ -250,6 +254,21 @@ namespace StationeersShortcuts
             {
                 UnityEngine.Debug.Log("Authoring tool selected");
                 inventory = findBeltSlotWithHash(789015045);
+            }
+
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.SensLens))
+            {
+                //Human parent = InventoryManager.ParentHuman;
+                if (InventoryManager.Parent is Human human)
+                {
+                    if (human.GlassesSlot.Get() is SensorLenses lens)
+                    {
+                        //SensorLenses lens = parent.GlassesSlot.Occupant as SensorLenses;
+                        lens.OnOff = !lens.OnOff;
+                        UnityEngine.Debug.Log("Sensor Lenses switched");
+                    }
+                    else UnityEngine.Debug.Log("Sensor Lenses not found");
+                }
             }
 
             // Get current active hand slot
