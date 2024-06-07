@@ -4,14 +4,23 @@ using Assets.Scripts.Objects;
 using Assets.Scripts.Objects.Entities;
 using HarmonyLib;
 using UnityEngine;
+using Assets.Scripts.UI;
+
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Assets.Scripts.UI;
+using Assets.Scripts.Util;
+using InputSystem;
+using UnityEngine;
 
 namespace StationeersShortcuts
 {
-    class ShortcutPatches
-    {
+    //class ShortcutPatches
+    //{
 
 
-    }
+    //}
 
     /* Custom shortcut key binding injection is done after KeyManager.SetupKeyBindings() method is 
      * called; this way, we can get our custom new bindings saved/load by the game during the 
@@ -31,6 +40,11 @@ namespace StationeersShortcuts
             // We will add the custom keys with default values to the KeyItem list using our new
             // created control group, however this method -due to accesibility of the class method-
             // will change the current ControlGroup name.
+            //var controlsLookupList = Traverse.Create(typeof(KeyManager)).Field("_controlsGroupLookup").GetValue() as Dictionary<string, ControlsGroup>; //read static field
+            //Dictionary<string, ControlsGroup> lookup = controlsLookupList;
+
+
+
             ShortcutInjectBindingGroup.AddKey("Backpack 2", KeyCode.Keypad7, controlsGroup1, false);
             ShortcutInjectBindingGroup.AddKey("Backpack 3", KeyCode.Keypad8, controlsGroup1, false);
             ShortcutInjectBindingGroup.AddKey("Backpack 4", KeyCode.Keypad9, controlsGroup1, false);
@@ -56,13 +70,16 @@ namespace StationeersShortcuts
 
 
             // We need to restore the name of the control group back to its correct string
-            controlsGroup1.Name = "ShortCuts";
+            //controlsGroup1.Name = "ShortCuts";
+
+            ControlsAssignment.RefreshState();
         }
 
         /* Custom method to add keys to a ControlGroup. We 'hijack' the control group lookup function 
          * that will also save the name of they key in the list for us
          */ 
-        private static void AddKey(string assignmentName,
+        private static void AddKey
+        (   string assignmentName,
             KeyCode keyCode,
             ControlsGroup controlsGroup,
             bool hidden = false
@@ -70,14 +87,21 @@ namespace StationeersShortcuts
         {
             // This is just because of the accessibility to change the assigned name, we use 
             // the control group for that.
-            controlsGroup.Name = assignmentName;
-            KeyManager.AddGroupLookup(controlsGroup);
+            //controlsGroup.Name = assignmentName;
+            //KeyManager.AddGroupLookup(controlsGroup);
+            //var foo = Traverse.Create<KeyManager>().Field("_controlsGroupLookup").GetValue<Dictionary<string, ControlsGroup>>();
+            var controlsLookupList = Traverse.Create(typeof(KeyManager)).Field("_controlsGroupLookup").GetValue() as Dictionary<string, ControlsGroup>; //read static field
+            controlsLookupList[assignmentName] = controlsGroup;
+            //Traverse.Create<KeyManager>().Field("_controlsGroupLookup").SetValue(foo);
+            Traverse.Create(typeof(KeyManager)).Field("_controlsGroupLookup").SetValue(controlsLookupList); //for static fields
 
             // Now Create the key, add its looup string name, and save it in the allkeys list, to ensure
             // is being saved/load by the game config initialisation function.
             KeyItem keyItem = new KeyItem(assignmentName, keyCode, hidden);
-            KeyManager.KeyItemLookup.Add(assignmentName, keyItem);
+            KeyManager.KeyItemLookup[assignmentName] = keyItem;
+            //KeyManager.KeyItemLookup.Add(assignmentName, keyItem);
             KeyManager.AllKeys.Add(keyItem);
+           // Debug.Log("Added key " + assignmentName);
         }
     }
 
@@ -91,7 +115,8 @@ namespace StationeersShortcuts
         SlotDisplayButton.CurrentSlot.HotkeyGrid.Hotkey.ControlText.text = "SC1";
 
      */
-    [HarmonyPatch(typeof(Slot), "RefreshSlotDisplay", new Type[] { typeof(bool) })]
+     
+    [HarmonyPatch(typeof(Slot), nameof(Slot.RefreshSlotDisplay))]//, new Type[] { typeof(bool) })]
     class UpdateSlotShortCutText
     {
         static void Postfix(Slot __instance)

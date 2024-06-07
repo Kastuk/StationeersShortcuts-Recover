@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,35 +20,35 @@ using UnityEngine;
 
 namespace StationeersShortcuts
 {
-    [BepInPlugin("net.ilo.plugins.ShortCutsPlugin", "ShortCuts Plug-In", "0.9.1.0")]
-    public class ShortcutsPlugin: BaseUnityPlugin
+    [BepInPlugin("net.ilo.plugins.ShortCutsPlugin", "ShortCuts Plug-In", "0.9.1.3")]
+    public class ShortcutsPlugin : BaseUnityPlugin
     {
 
         // Backpack shortcuts
-        KeyCode BPSC2;
-        KeyCode BPSC3;
-        KeyCode BPSC4;
-        KeyCode BPSC5;
+        public static KeyCode BPSC2;
+        public static KeyCode BPSC3;
+        public static KeyCode BPSC4;
+        public static KeyCode BPSC5;
 
         // Suit shortcuts
-        KeyCode UNSC1;
-        KeyCode UNSC2;
+        public static KeyCode UNSC1;
+        public static KeyCode UNSC2;
 
         // ToolBelt shortcuts
-        KeyCode TBSC1;
-        KeyCode TBSC2;
-        KeyCode TBSC3;
-        KeyCode TBSC4;
+        public static KeyCode TBSC1;
+        public static KeyCode TBSC2;
+        public static KeyCode TBSC3;
+        public static KeyCode TBSC4;
 
         // Custom tools shortcuts
-        KeyCode GrinderSC;
-        KeyCode WelderSC;
-        KeyCode DrillSC;
-        KeyCode WrenchSC;
-        KeyCode CuttersSC;
-        KeyCode ScrewSC;
-        KeyCode CrowbarSC;
-        KeyCode AuthoringSC;
+        public static KeyCode GrinderSC;
+        public static KeyCode WelderSC;
+        public static KeyCode DrillSC;
+        public static KeyCode WrenchSC;
+        public static KeyCode CuttersSC;
+        public static KeyCode ScrewSC;
+        public static KeyCode CrowbarSC;
+        public static KeyCode AuthoringSC;
 
         // Awake is called once when both the game and the plug-in are loaded
         void Awake()
@@ -95,56 +95,72 @@ namespace StationeersShortcuts
             TBSC4 = KeyManager.GetKey("Toolbelt 4");
 
             // Tools keybindings
-            GrinderSC   = KeyManager.GetKey("Grinder"); 
-            WelderSC    = KeyManager.GetKey("Welder"); 
-            DrillSC     = KeyManager.GetKey("Hand Drill"); ;
-            WrenchSC    = KeyManager.GetKey("Wrench"); 
-            CuttersSC   = KeyManager.GetKey("Cable Cutters"); 
-            ScrewSC     = KeyManager.GetKey("Screwdriver");
-            CrowbarSC   = KeyManager.GetKey("Crowbar");
+            GrinderSC = KeyManager.GetKey("Grinder");
+            WelderSC = KeyManager.GetKey("Welder");
+            DrillSC = KeyManager.GetKey("Hand Drill"); ;
+            WrenchSC = KeyManager.GetKey("Wrench");
+            CuttersSC = KeyManager.GetKey("Cable Cutters");
+            ScrewSC = KeyManager.GetKey("Screwdriver");
+            CrowbarSC = KeyManager.GetKey("Crowbar");
             AuthoringSC = KeyManager.GetKey("Authoring tool");
         }
 
         // Tracking of user inputs to perform slot swapping.
+        
+//Kastuk: original ShortcutsPlugin.Update is not running. 
+//Supposedly instance got destroyed after Awake got finished, may it need to use DontDestroyOnLoad or something. FOr now I need injection into any other regular game Update to check keys.
 
-        void Update()
+    }
+        [HarmonyPatch(typeof(GameManager), nameof(GameManager.Update))]//, new Type[] { typeof(bool) })]
+        class CheckKeysPressed
         {
+        static bool warn = true;
+        static bool warn2 = true;
+
+        static void Postfix()
+        { 
+
             // Usual suspects, don't check for key pressing in any of these cases
-            if (GameManager.GameState != GameState.Running || (UnityEngine.Object)InventoryManager.ParentBrain == (UnityEngine.Object)null || WorldManager.IsPaused)
+            if (warn) Debug.Log("Update of keys tracker is works"); warn = false;
+
+
+            if (GameManager.GameState != GameState.Running || (UnityEngine.Object)InventoryManager.ParentBrain == (UnityEngine.Object)null || WorldManager.IsGamePaused)
                 return;
+
+            if (warn2) Debug.Log("Update of keys tracker isovercome initial checks"); warn2 = false;
 
             // this will be the slot from any of the inventory items.
             Slot inventory = null;
 
             // Backpack slots
-            if (KeyManager.GetButtonDown(BPSC2))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.BPSC2))
             {
                 UnityEngine.Debug.Log("Backpack 2 selected");
                 inventory = FindSlotIdInBackPack(2);
             }
-            if (KeyManager.GetButtonDown(BPSC3))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.BPSC3))
             {
                 UnityEngine.Debug.Log("Backpack 2 selected");
                 inventory = FindSlotIdInBackPack(3);
             }
-            if (KeyManager.GetButtonDown(BPSC4))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.BPSC4))
             {
                 UnityEngine.Debug.Log("Backpack 4 selected");
                 inventory = FindSlotIdInBackPack(4);
             }
-            if (KeyManager.GetButtonDown(BPSC5))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.BPSC5))
             {
                 UnityEngine.Debug.Log("Backpack 5 selected");
                 inventory = FindSlotIdInBackPack(5);
             }
 
             // Uniform slots
-            if (KeyManager.GetButtonDown(UNSC1))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.UNSC1))
             {
                 UnityEngine.Debug.Log("Uniform 1 selected");
                 inventory = FindSlotIdInUniform(1);
             }
-            if (KeyManager.GetButtonDown(UNSC2))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.UNSC2))
             {
                 UnityEngine.Debug.Log("Uniform 2 selected");
                 inventory = FindSlotIdInUniform(2);
@@ -152,22 +168,22 @@ namespace StationeersShortcuts
 
 
             // toolbelt slots
-            if (KeyManager.GetButtonDown(TBSC1))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.TBSC1))
             {
                 UnityEngine.Debug.Log("Toolbelt 1 selected");
                 inventory = FindSlotIdInToolBelt(1);
             }
-            if (KeyManager.GetButtonDown(TBSC2))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.TBSC2))
             {
                 UnityEngine.Debug.Log("Toolbelt 2 selected");
                 inventory = FindSlotIdInToolBelt(2);
             }
-            if (KeyManager.GetButtonDown(TBSC3))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.TBSC3))
             {
                 UnityEngine.Debug.Log("Toolbelt 3 selected");
                 inventory = FindSlotIdInToolBelt(3);
             }
-            if (KeyManager.GetButtonDown(TBSC4))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.TBSC4))
             {
                 UnityEngine.Debug.Log("Toolbelt 4 selected");
                 inventory = FindSlotIdInToolBelt(4);
@@ -175,14 +191,14 @@ namespace StationeersShortcuts
 
 
             // Custom tool keybindings
-            if (KeyManager.GetButtonDown(GrinderSC))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.GrinderSC))
             {
                 UnityEngine.Debug.Log("Grinder selected");
                 inventory = findBeltSlotWithHash(201215010); // grinder
                 if (inventory == null)
                     inventory = findBeltSlotWithHash(240174650); // mk2 grinder
             }
-            if (KeyManager.GetButtonDown(WelderSC))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.WelderSC))
             {
                 UnityEngine.Debug.Log("Welder selected");
                 inventory = findBeltSlotWithHash(1385062886); //arc welder
@@ -190,7 +206,7 @@ namespace StationeersShortcuts
                     inventory = findBeltSlotWithHash(-2061979347); // mk2 welder
             }
 
-            if (KeyManager.GetButtonDown(DrillSC))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.DrillSC))
             {
                 UnityEngine.Debug.Log("Drill selected");
                 inventory = findBeltSlotWithHash(2009673399); // hand drill
@@ -198,7 +214,7 @@ namespace StationeersShortcuts
                     inventory = findBeltSlotWithHash(324791548); // mk2 drill 
             }
 
-            if (KeyManager.GetButtonDown(WrenchSC))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.WrenchSC))
             {
                 UnityEngine.Debug.Log("Wrench selected");
                 inventory = findBeltSlotWithHash(-1886261558); // wrench
@@ -206,7 +222,7 @@ namespace StationeersShortcuts
                     inventory = findBeltSlotWithHash(1862001680); // mk2 wrench 
             }
 
-            if (KeyManager.GetButtonDown(CuttersSC))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.CuttersSC))
             {
                 UnityEngine.Debug.Log("Cutters selected");
                 inventory = findBeltSlotWithHash(1535854074);
@@ -214,7 +230,7 @@ namespace StationeersShortcuts
                     inventory = findBeltSlotWithHash(-178893251); // mk2 cutters
             }
 
-            if (KeyManager.GetButtonDown(ScrewSC))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.ScrewSC))
             {
                 UnityEngine.Debug.Log("Screwdriver selected");
                 inventory = findBeltSlotWithHash(687940869);
@@ -222,7 +238,7 @@ namespace StationeersShortcuts
                     inventory = findBeltSlotWithHash(-2015613246); // mk2 screwdriver
             }
 
-            if (KeyManager.GetButtonDown(CrowbarSC))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.CrowbarSC))
             {
                 UnityEngine.Debug.Log("Crowbar selected");
                 inventory = findBeltSlotWithHash(856108234);
@@ -230,7 +246,7 @@ namespace StationeersShortcuts
                     inventory = findBeltSlotWithHash(1440775434); // mk2 crowbar
             }
 
-            if (KeyManager.GetButtonDown(AuthoringSC))
+            if (KeyManager.GetButtonDown(ShortcutsPlugin.AuthoringSC))
             {
                 UnityEngine.Debug.Log("Authoring tool selected");
                 inventory = findBeltSlotWithHash(789015045);
@@ -258,7 +274,7 @@ namespace StationeersShortcuts
 
         }
 
-        private Slot FindSlotIdInBackPack(int index)
+        static Slot FindSlotIdInBackPack(int index)
         {
             Human Character = InventoryManager.ParentHuman;
             if (Character.BackpackSlot.Occupant != null && Character.BackpackSlot.Occupant.Slots.Count > index) 
@@ -268,7 +284,7 @@ namespace StationeersShortcuts
             return (Slot)null;
         }
 
-        private Slot FindSlotIdInUniform(int index)
+        static Slot FindSlotIdInUniform(int index)
         {
             Human Character = InventoryManager.ParentHuman;
             if (Character.UniformSlot.Occupant != null && Character.UniformSlot.Occupant.Slots.Count > index)
@@ -279,7 +295,7 @@ namespace StationeersShortcuts
         }
 
 
-        private Slot FindSlotIdInToolBelt(int index)
+        static Slot FindSlotIdInToolBelt(int index)
         {
             Human Character = InventoryManager.ParentHuman;
             if (Character.ToolbeltSlot.Occupant != null && Character.ToolbeltSlot.Occupant.Slots.Count > index)
@@ -290,7 +306,7 @@ namespace StationeersShortcuts
         }
 
 
-        private Slot findBeltSlotWithHash(int prefabHash)
+        static Slot findBeltSlotWithHash(int prefabHash)
         {
             Human Character = InventoryManager.ParentHuman;
             if (Character.ToolbeltSlot.Occupant != null)
@@ -306,7 +322,7 @@ namespace StationeersShortcuts
             return (Slot)null;
         }
 
-        private KeyResult IsValid(Slot inventory, Slot hand)
+        static KeyResult IsValid(Slot inventory, Slot hand)
         {
             // No inventory slot selected so nothing to do
             if (InventoryManager.Instance.IsUsingSmartTool || inventory == null)
