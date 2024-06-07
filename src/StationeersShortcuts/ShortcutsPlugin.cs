@@ -107,7 +107,7 @@ namespace StationeersShortcuts
 
         // Tracking of user inputs to perform slot swapping.
         
-//Kastuk: original ShortcutsPlugin.Update is not running. 
+//Kastuk: original ShortcutsPlugin.Update is not running.  
 //Supposedly instance got destroyed after Awake got finished, may it need to use DontDestroyOnLoad or something. FOr now I need injection into any other regular game Update to check keys.
 
     }

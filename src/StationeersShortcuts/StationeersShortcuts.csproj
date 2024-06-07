@@ -70,7 +70,5 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>copy "C:\Users\Kastuk\source\repos\StationeersShortcuts\src\StationeersShortcuts\bin\Debug\StationeersShortcuts.dll" "E:\SteamLibrary\steamapps\common\Stationeers\BepInEx\plugins\StationeersShortcuts.dll"</PostBuildEvent>
-  </PropertyGroup>
+
 </Project>
